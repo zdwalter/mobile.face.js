@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <title>Capture Photo</title>
+
+    <script type="text/javascript" charset="utf-8" src="phonegap.js"></script>
+    
+    <script src="jquery.js"></script> 
+	<script src="ccv.js"></script> 
+	<script src="face.js"></script>
+	<script src="jquery.facedetection.js"></script> 
+
+	<script>
+	$(function() {
+		$('#try').click(function() {
+			var $this = $(this);
+			alert('detecting...');
+            
+			return $('img#largeImage').faceDetection({
+			confidence: null,
+				complete:function(img, coords) {
+				
+				alert('found:'+coords.length+' face');
+				var smallImage = $('img#smallImage');
+				var x = smallImage.position().left;
+				var y = smallImage.position().top;
+				var scale = smallImage[0].width / img[0].width;
+				//alert(x+','+y+','+smallImage[0].width+','+img[0].width+','+scale);
+				for (var i = 0; i < coords.length; i++) {
+					$('<div>', {
+						'class':'face',
+						'css': {
+							'position':	'absolute',
+							'left':		Math.round(x+coords[i].x*scale) +'px',
+							'top':		Math.round(y+coords[i].y*scale) +'px',
+							'width': 	Math.round(coords[i].width*scale)	+'px',
+							'height': 	Math.round(coords[i].height*scale)	+'px'
+						}
+					})
+					.appendTo('#content');
+				}
+					$this.text('Done!');
+				},
+				error:function(img, code, message) {
+					$this.text('error!');
+					alert('Error: '+message);
+				}
+			});
+			
+		});
+		return false;
+	});
+	</script>
+	<style>
+		.face {
+			border:2px solid #FFF;
+		}
+	</style>
+	
+    <script type="text/javascript" charset="utf-8">
+
+    var pictureSource;   // picture source
+    var destinationType; // sets the format of returned value 
+
+    // Wait for PhoneGap to connect with the device
+    //
+    document.addEventListener("deviceready",onDeviceReady,false);
+
+    // PhoneGap is ready to be used!
+    //
+    function onDeviceReady() {
+        pictureSource=navigator.camera.PictureSourceType;
+        destinationType=navigator.camera.DestinationType;
+    }
+
+
+    // Called when a photo is successfully retrieved
+    //
+    function onPhotoURISuccess(imageURI) {
+      // Uncomment to view the image file URI 
+      // console.log(imageURI);
+
+      // Get image handle
+      //
+      var smallImage = $('#smallImage');
+
+
+      // Show the captured photo
+      // The inline CSS rules are used to resize the image
+      //
+      $('#smallImage').attr('src', imageURI);
+      
+      $('#largeImage').attr('src', imageURI);
+    }
+
+
+
+    // A button will call this function
+    //
+    function getPhoto(source) {
+      // Retrieve image file location from specified source
+      navigator.camera.getPicture(onPhotoURISuccess, onFail, { quality: 50, 
+        destinationType: destinationType.FILE_URI,
+        sourceType: source });
+    }
+
+    // Called if something bad happens.
+    // 
+    function onFail(message) {
+      alert('Failed because: ' + message);
+    }
+
+    </script>
+  </head>
+  <body>
+    
+    
+ <div id="container">
+	<div id="header">
+	    <button onclick="getPhoto(pictureSource.SAVEDPHOTOALBUM);">From Photo Album</button>
+	    <a href="#" id="try">detect faces.</a> 
+	</div>
+	<div id="content">
+	    <img style="width:300px" id="smallImage" src="http://tp4.sinaimg.cn/1668493667/180/1293878055/1" />
+	</div>
+</div>
+<div id='hidden' style="position: absolute;left:-10000px;">
+    <img id="largeImage" src="http://tp4.sinaimg.cn/1668493667/180/1293878055/1" />
+</div>
+  </body>
+</html>
